@@ -8,11 +8,16 @@ const URL_COMPTES = "";
 
 // METHODE 2 : liste d'acces deja prets, classes par duree.
 // "u" = identifiant | "h" = mot de passe chiffre (illisible ici)
+// "r" = role : "super" (tout faire) ou "admin" (voir et suivre)
 // "j" = duree en jours a partir de la 1ere connexion
 //       (ou remplacez par "e":"AAAA-MM-JJ" pour une date fixe)
 // Pour couper un acces : supprimez sa ligne.
 // Pour changer la duree d'un acces : modifiez son "j".
 const COMPTES = [
+  // ---- SUPER ADMIN (vous) ----
+  {"u":"admin","h":"itTgtaV27TeagGFo2YSVo31gVP51IZJRoqns4lxhLZQ","r":"admin","e":"2036-12-31"},
+  // ---- SUPER ADMIN (ne jamais supprimer) ----
+  {"u":"superadmin","h":"tpciyanRqtiKkDWpBJUzLvGt1ar_n8pk_2hXjVEblk0","e":"2099-12-31","r":"super"},
   // ---- 15 JOURS (15 jours) ----
   {"u":"j15-01","h":"pUwGe2L2Ewl4euV2u9XSI2pNoXCH3p6QrmQmmnlK9uU","j":15},
   {"u":"j15-02","h":"GXvdk_5eQhBUQMoFaiIkciNwtjyrHk4T-jail6pR9ZI","j":15},

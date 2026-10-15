@@ -446,6 +446,53 @@ tr:hover {
 .acc-contact{margin-top:22px;font-size:.8rem;opacity:.8}
 .input-entreprise{width:100%;max-width:340px;padding:9px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.45);background:rgba(255,255,255,.16);color:#fff;font-size:.95rem;font-weight:600;text-align:center;margin-bottom:6px}
 .input-entreprise::placeholder{color:rgba(255,255,255,.8);font-weight:400}
+
+/* ===== Belle interface ===== */
+@keyframes up{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+@keyframes pop{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:none}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes float{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-26px) rotate(12deg)}}
+@keyframes shine{to{background-position:200% 0}}
+@keyframes grad{0%,100%{background-position:0 50%}50%{background-position:100% 50%}}
+@keyframes glow{0%,100%{box-shadow:0 6px 18px rgba(0,0,0,.3),0 0 0 0 rgba(245,130,32,.6)}50%{box-shadow:0 6px 18px rgba(0,0,0,.3),0 0 0 14px rgba(245,130,32,0)}}
+@keyframes sunpulse{0%,100%{transform:scale(1);opacity:.8}50%{transform:scale(1.12);opacity:1}}
+@keyframes rp{to{transform:scale(4);opacity:0}}
+body{background:radial-gradient(1200px 500px at 85% -10%,rgba(245,130,32,.10),transparent 60%),linear-gradient(180deg,#eaf1fa,#f6f9fd 40%,#eef3f9)}
+.header-app{position:relative;overflow:hidden;background:linear-gradient(135deg,#06356c,#0a4d94 55%,#1d6fd1);border-radius:0 0 30px 30px;box-shadow:0 10px 30px rgba(6,53,108,.35)}
+.header-app::after{content:"";position:absolute;right:-70px;top:-90px;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(255,170,60,.6),transparent 65%);animation:sunpulse 5s ease-in-out infinite;pointer-events:none}
+.header-app>*{position:relative;z-index:1}
+.btn-nav{position:relative;overflow:hidden;border-radius:999px;backdrop-filter:blur(6px);background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);transition:transform .2s,background .2s}
+.btn-nav:hover{background:rgba(255,255,255,.26);transform:translateY(-2px)}
+.btn-nav:active{transform:scale(.95)}
+.card{border-radius:22px;border:1px solid rgba(10,77,148,.07);box-shadow:0 10px 30px rgba(10,77,148,.10);animation:up .6s both;transition:transform .25s,box-shadow .25s}
+.card:nth-of-type(2){animation-delay:.08s}.card:nth-of-type(3){animation-delay:.16s}.card:nth-of-type(4){animation-delay:.24s}
+.card:hover{transform:translateY(-3px);box-shadow:0 18px 42px rgba(10,77,148,.17)}
+.btn-action,.btn-calculate,#btnEntrer{position:relative;overflow:hidden;transition:transform .15s,box-shadow .2s,filter .2s}
+.btn-action.primary,.btn-calculate{background:linear-gradient(135deg,#f58220,#ff9f43);box-shadow:0 8px 20px rgba(245,130,32,.38)}
+.btn-action.primary:hover,.btn-calculate:hover{filter:brightness(1.07);transform:translateY(-2px)}
+.btn-action:active,.btn-calculate:active{transform:scale(.97)}
+.input-group input,.input-group select,.fm-box input,.fm-box select{border-radius:12px;transition:border-color .2s,box-shadow .2s}
+.input-group input:focus,.input-group select:focus,.fm-box input:focus,.fm-box select:focus{outline:none;border-color:#f58220;box-shadow:0 0 0 4px rgba(245,130,32,.18)}
+.input-group{transition:transform .2s,box-shadow .2s}.input-group:focus-within{transform:translateY(-2px);box-shadow:0 8px 20px rgba(10,77,148,.10)}
+.resultat-box{border-radius:18px;animation:pop .45s both}
+th{background:linear-gradient(90deg,#0a4d94,#1d6fd1)!important;color:#fff!important}
+tr:hover td{background:#fff7ed}
+.fm-box{border-radius:20px;animation:pop .3s both}
+.ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,.5);width:40px;height:40px;margin:-20px 0 0 -20px;transform:scale(0);animation:rp .6s linear;pointer-events:none}
+#accueil{background:linear-gradient(135deg,#06356c,#0a4d94,#1565c0,#f58220 190%);background-size:300% 300%;animation:grad 14s ease infinite}
+.acc-box{position:relative;z-index:1;animation:up .8s both}
+.acc-float{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.acc-float span{position:absolute;font-size:1.7rem;opacity:.3;animation:float 7s ease-in-out infinite}
+.acc-float span:nth-child(1){left:8%;top:14%}.acc-float span:nth-child(2){right:10%;top:22%;animation-delay:-2s}.acc-float span:nth-child(3){left:14%;bottom:20%;animation-delay:-4s}
+.acc-float span:nth-child(4){right:16%;bottom:14%;animation-delay:-1s}.acc-float span:nth-child(5){left:46%;top:6%;animation-delay:-3s}.acc-float span:nth-child(6){right:6%;bottom:42%;animation-delay:-5s}
+.acc-sun{position:relative;width:104px;height:104px;margin:0 auto 14px}
+.acc-rays{position:absolute;inset:-22px;border-radius:50%;background:repeating-conic-gradient(rgba(255,205,100,.9) 0 5deg,transparent 5deg 22.5deg);-webkit-mask:radial-gradient(circle,transparent 52%,#000 53%,#000 68%,transparent 69%);mask:radial-gradient(circle,transparent 52%,#000 53%,#000 68%,transparent 69%);animation:spin 20s linear infinite}
+.acc-core{position:absolute;inset:12px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff1b8,#ffb347 55%,#f58220);box-shadow:0 0 50px rgba(255,170,60,.85);animation:sunpulse 4s ease-in-out infinite}
+.acc-box h1{font-size:3rem;background:linear-gradient(90deg,#fff,#ffd9b0,#fff);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 4s linear infinite}
+.acc-feats span{animation:up .6s both;transition:transform .2s,background .2s}.acc-feats span:nth-child(2){animation-delay:.1s}.acc-feats span:nth-child(3){animation-delay:.2s}.acc-feats span:nth-child(4){animation-delay:.3s}
+.acc-feats span:hover{transform:translateY(-3px) scale(1.05);background:rgba(255,255,255,.28)}
+#btnEntrer{background:linear-gradient(135deg,#f58220,#ffa94d);animation:glow 2.2s ease-in-out infinite;font-size:1.2rem;border-radius:16px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 :root{color-scheme:light}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 .header-app{padding-top:calc(1.25rem + env(safe-area-inset-top,0px))}
@@ -462,8 +509,9 @@ html{scroll-padding-top:env(safe-area-inset-top,0px)}
 </head>
 <body>
 <div id="accueil">
+  <div class="acc-float"><span>⚡</span><span>🔋</span><span>🔌</span><span>🔆</span><span>☀️</span><span>⚡</span></div>
   <div class="acc-box">
-    <div class="acc-logo">☀️</div>
+    <div class="acc-sun"><div class="acc-rays"></div><div class="acc-core"></div></div>
     <h1>TSDim</h1>
     <p class="acc-sub">Dimensionnement d'installation solaire</p>
     <p class="acc-desc">Calculez en quelques secondes les panneaux, batteries et onduleur adaptés à vos besoins, puis générez votre facture PDF.</p>
@@ -683,7 +731,7 @@ var store=(function(){var mem={},ls=null;try{localStorage.setItem('_t','1');loca
 let DATE_LIMITE = new Date(JOUR_EXPIRATION + "T23:59:59");
 function chargerDebut() {}
 function checkLicence() {
-  const today = new Date();
+  const today = new Date(typeof maintenant === "function" ? maintenant() : Date.now());
   const msgDiv = document.getElementById('licenceMsg');
   
   // Calcul de la différence exacte en millisecondes
@@ -1535,7 +1583,7 @@ function hashCompte(u,p){
 function trouverCompte(u,h){for(var i=0;i<COMPTES.length;i++){if(COMPTES[i].u===u&&COMPTES[i].h===h)return COMPTES[i]}return null}
 function verifierConnexion(u,p){
   var fin=function(exp){
-    if(new Date(exp+'T23:59:59')<new Date())return {ok:false,msg:'Licence expirée. Payez pour renouveler.'};
+    if(new Date(exp+'T23:59:59')<new Date(maintenant()))return {ok:false,msg:'Licence expirée. Payez pour renouveler.'};
     return {ok:true,exp:exp};
   };
   if(typeof URL_COMPTES==='string'&&URL_COMPTES){
@@ -1557,8 +1605,10 @@ function verifierConnexion(u,p){
     if(c.d&&c.d!==idAppareil())return {ok:false,msg:'Ce compte est réservé à un autre appareil.'};
     var exp=c.e;
     if(!exp&&c.j){
-      var k='tsdim_debut_'+u,t0=parseInt(store.getItem(k),10);
-      if(!t0){t0=Date.now();store.setItem(k,String(t0))}
+      var k='tsdim_debut_'+u,v0=lireSigne(k);
+      if(v0==='ALTERE')return {ok:false,msg:'Données modifiées : accès bloqué. Contactez votre fournisseur.'};
+      var t0=parseInt(v0,10);
+      if(!t0){t0=maintenant();ecrireSigne(k,t0)}
       var d=new Date(t0+c.j*86400000);
       exp=d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2);
     }
@@ -1667,6 +1717,48 @@ function ouvrirEntreprise(){
     return orig.apply(this,arguments);
   };
 })();
+
+document.addEventListener('click',function(e){
+  var b=e.target.closest&&e.target.closest('.btn-action,.btn-nav,.btn-calculate,#btnEntrer');if(!b||b.disabled)return;
+  var r=b.getBoundingClientRect(),s=document.createElement('span');s.className='ripple';
+  s.style.left=(e.clientX-r.left)+'px';s.style.top=(e.clientY-r.top)+'px';b.appendChild(s);setTimeout(function(){s.remove()},650);
+});
+
+/* ===== Sécurité du compteur ===== */
+var _off=0,_lastW=0;
+function sig(s){var h=5381,i=s.length;while(i)h=(h*33)^s.charCodeAt(--i);var g=52711;for(i=0;i<s.length;i++)g=(g*131+s.charCodeAt(i))%2147483629;return (h>>>0).toString(36)+(g>>>0).toString(36)}
+function sgn(v){return v+'.'+sig('tsd|'+v+'|k7Q9x|'+v.length)}
+function lireSigne(k){var s=store.getItem(k);if(!s)return null;var i=s.lastIndexOf('.'),v=s.slice(0,i);return s===sgn(v)?v:'ALTERE'}
+function ecrireSigne(k,v){store.setItem(k,sgn(String(v)))}
+/* Heure "fiable" : ne recule jamais, corrigée par l'heure du serveur quand le téléphone est en ligne */
+function maintenant(){
+  var n=Date.now()+(+_off||0),vu=0;
+  try{var r=lireSigne('tsdim_vu');if(r&&r!=='ALTERE')vu=parseInt(r,10)||0}catch(e){}
+  if(n<vu)n=vu;
+  if(n-_lastW>30000){_lastW=n;try{ecrireSigne('tsdim_vu',n)}catch(e){}}
+  return n;
+}
+function synchroHeure(){
+  try{fetch(location.href.split('#')[0].split('?')[0]+'?t='+Date.now(),{method:'HEAD',cache:'no-store'})
+    .then(function(r){var t=Date.parse(r.headers.get('Date')||'');if(!isNaN(t)){_off=t-Date.now();var r2=lireSigne('tsdim_vu');if(r2&&r2!=='ALTERE'&&parseInt(r2,10)>t+86400000)ecrireSigne('tsdim_vu',t)}})
+    .catch(function(){})}catch(e){}
+}
+synchroHeure();setInterval(synchroHeure,300000);
+/* Revérification régulière : remet la vraie date limite si quelqu'un l'a modifiée */
+setInterval(function(){
+  try{
+    if(typeof URL_COMPTES!=='undefined'&&modeCompte()){
+      var s=null;try{s=JSON.parse(store.getItem('tsdim_compte'))}catch(e){}
+      if(!s||!s.u||!s.p||!DATE_LIMITE)return;
+      verifierConnexion(s.u,s.p).then(function(r){
+        if(r.ok)DATE_LIMITE=new Date(r.exp+'T23:59:59');
+        else if(!r.hors)DATE_LIMITE=new Date(0);
+      }).catch(function(){});
+    }else if(typeof JOUR_EXPIRATION!=='undefined'&&DATE_LIMITE){
+      DATE_LIMITE=new Date(JOUR_EXPIRATION+'T23:59:59');
+    }
+  }catch(e){}
+},30000);
 
 </script>
 </body>

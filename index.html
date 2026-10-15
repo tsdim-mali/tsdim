@@ -530,6 +530,7 @@ html{scroll-padding-top:env(safe-area-inset-top,0px)}
     </div>
     <nav class="header-nav">
       <button onclick="ouvrirAdmin()" class="btn-nav" id="btnAdmin" style="display:none">🛡️ Admin</button>
+      <button onclick="deconnexion()" class="btn-nav" id="btnQuit" style="display:none">🚪 Quitter</button>
       <button onclick="ouvrirAdmin()" class="btn-nav" id="btnAdmin" style="display:none">🛡️ Admin</button>
       <button onclick="ouvrirEntreprise()" class="btn-nav">🏢 Entreprise</button>
       <button onclick="enregistrer()" class="btn-nav">💾 Enregistrer</button>
@@ -1851,7 +1852,8 @@ function ouvrirAdmin(){
 
 /* ===== Espace SUPER ADMIN (dans le site) ===== */
 var ROLE='client';
-function majAdmin(){var b=document.getElementById('btnAdmin');if(b)b.style.display=(ROLE==='admin')?'':'none'}
+function majAdmin(){var b=document.getElementById('btnAdmin');if(b)b.style.display=(ROLE==='admin')?'':'none';var q=document.getElementById('btnQuit');if(q)q.style.display=modeCompte()?'':'none'}
+function deconnexion(){try{store.removeItem('tsdim_compte')}catch(e){}location.reload()}
 function notesAdmin(){try{return JSON.parse(store.getItem('tsdim_admin_notes'))||{}}catch(e){return {}}}
 function dureeTxt(c){return c.j?(c.j>=365?Math.round(c.j/365)+' an':c.j+' j'):(c.e||'-')}
 function copierTexte(t){try{navigator.clipboard.writeText(t).then(function(){alert('✅ Copié')},function(){alert('Copie impossible')})}catch(e){alert('Copie impossible')}}

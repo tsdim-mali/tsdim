@@ -10,7 +10,7 @@ const URL_COMPTES = "";
 // "u" = identifiant | "h" = mot de passe chiffre (illisible ici)
 // "r" = role : "super" (tout faire) ou "admin" (voir et suivre)
 // "j" = duree en jours a partir de la 1ere connexion
-//       (ou remplacez par "e":"AAAA-MM-JJ" pour une date fixe)
+//       (ou "m" = duree en MINUTES, ou "e":"AAAA-MM-JJ" pour une date fixe)
 // Pour couper un acces : supprimez sa ligne.
 // Pour changer la duree d'un acces : modifiez son "j".
 const COMPTES = [
@@ -84,6 +84,28 @@ const COMPTES = [
   {"u":"an-03","h":"TGnJPyYK4_l8OCgTwxxlA_KO50kH2HnNG6P-MDVA7kU","j":365},
   {"u":"an-04","h":"zegmZ5UJNN2v5ZDQ8DIK9MpaBPzMmgxVWgu1EFrl-uE","j":365},
   {"u":"an-05","h":"xhSc5_Xb2kPyHPjY_y8TziGtTyExp9RmOL12deQos6I","j":365},
+  // ---- ESSAI 10 MIN (10 minutes a partir de la 1ere connexion) ----
+  {"u":"e10-01","h":"FRgGRm-BWHj_VwLwsALNTlFwtmIXdngaOkLDTFussso","m":10},
+  {"u":"e10-02","h":"ADsCt3OIni6O13ZyBUrkl-B5zpubdvc1H9t_mN6DyRI","m":10},
+  {"u":"e10-03","h":"-IHEB1f78Zw9QydVaglQv3zcJxqpEHBif1tAiJyYJWM","m":10},
+  {"u":"e10-04","h":"vRvvohQi8SznFmlfMAaXNUXghxI_NU4ke6kfVP1NEEU","m":10},
+  {"u":"e10-05","h":"cJZXBWhu_DA4H3dIqgIA7uTK9OkJUeY8Iyc1bgWGZhU","m":10},
+  {"u":"e10-06","h":"ZlkGMStUCIXiNvlvZoEhScWl7du0XATJM84Ov_TWyC8","m":10},
+  {"u":"e10-07","h":"zp7Q7FWpyd2Ysu20lUEG2x50abKKrDRSylApD0dKD9U","m":10},
+  {"u":"e10-08","h":"GrDGPPyYcxn4t3tD5lY9lrvl5ShTG6RMg9EiLGGqkQQ","m":10},
+  {"u":"e10-09","h":"xzJdpqKP7PAyKI1OFz9qT2gBTcWayweRE4cRb-G1Ntw","m":10},
+  {"u":"e10-10","h":"xpRa1eYKafe5-WjO4KDEBR0jxnVVVxPrOp83llXfLx0","m":10},
+  // ---- ESSAI 30 MIN (30 minutes a partir de la 1ere connexion) ----
+  {"u":"e30-01","h":"mmbV2z2OgB4-E7ErdP5I9XZPtzdZAQzzVNeTD0LVldE","m":30},
+  {"u":"e30-02","h":"nrOzanQ74PbAX_3zXe-xtg66e61Ti1YWprhpaDcrj_g","m":30},
+  {"u":"e30-03","h":"se1YZ0yHMNXTjQOLt-HFBlKjGGzHpf7VCCKIIDo30Yk","m":30},
+  {"u":"e30-04","h":"Ls7wVtgMmqq0ZoidHFGGH-cNEPnvF65EkuoDJZRfq6c","m":30},
+  {"u":"e30-05","h":"jossCUBKHmxy9oF8HlgrYfgIi4oIqtaqX5F67m8R_jg","m":30},
+  {"u":"e30-06","h":"UZVLn25NV3jAZ0jH3Xv8cnjkQ3ox0uBw8TuUP5xmyL0","m":30},
+  {"u":"e30-07","h":"HIj-l-yVKyBf1XYZImkG98kqMZOa6wBin4Ur5kL4jqg","m":30},
+  {"u":"e30-08","h":"YoZlUIiCaLgI_-8fUx6Qo1ide0KXqkLe9qMsO1RLal0","m":30},
+  {"u":"e30-09","h":"08LGUmPiEroUooC_oVigZFHFdQgO92xgFW3kIkTWfjA","m":30},
+  {"u":"e30-10","h":"OeGaWa4A8CKcjdn0SEsf0S4pp2JbKuIQtI9dHXw4wuo","m":30},
 ];
 
 // Utilise seulement si la liste COMPTES est vide

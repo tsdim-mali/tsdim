@@ -1606,6 +1606,15 @@ function verifierConnexion(u,p,silencieux){
     var c=trouverCompte(u,h);
     if(!c)return {ok:false,msg:'Identifiant ou mot de passe incorrect.'};
     if(c.d&&c.d!==idAppareil())return {ok:false,msg:'Ce compte est réservé à un autre appareil.'};
+    if(c.m){
+      var k2='tsdim_debut_'+u,v1=lireSigne(k2);
+      if(v1==='ALTERE')return {ok:false,msg:'Données modifiées : accès bloqué. Contactez votre fournisseur.'};
+      var t1=parseInt(v1,10);
+      if(!t1){t1=maintenant();ecrireSigne(k2,t1)}
+      var fin2=t1+c.m*60000;
+      if(maintenant()>fin2)return {ok:false,msg:'Essai terminé. Payez pour continuer.'};
+      return {ok:true,exp:'',fin:fin2,role:c.r||'client'};
+    }
     var exp=c.e;
     if(!exp&&c.j){
       var k='tsdim_debut_'+u,v0=lireSigne(k);
@@ -1623,7 +1632,7 @@ function connexionAuto(cb){
   var s=null;try{s=JSON.parse(store.getItem('tsdim_compte'))}catch(e){}
   if(!s||!s.u||!s.p)return afficherConnexion(cb);
   verifierConnexion(s.u,s.p).then(function(r){
-    if(r.ok){DATE_LIMITE=new Date(r.exp+'T23:59:59');ROLE=r.role||'client';majAdmin();if(r.hors)alert('📴 Hors ligne : dernière licence connue utilisée.');cb(true)}
+    if(r.ok){DATE_LIMITE=limiteDe(r);ROLE=r.role||'client';majAdmin();if(r.hors)alert('📴 Hors ligne : dernière licence connue utilisée.');cb(true)}
     else{store.removeItem('tsdim_compte');if(r.msg)alert('❌ '+r.msg);afficherConnexion(cb)}
   });
 }
@@ -1639,7 +1648,7 @@ function ouvrirPaiement(){
 }
 function afficherConnexion(cb){
   var ov=document.createElement('div');ov.className='fm-overlay';
-  var wa='https://wa.me/22360380324?text='+encodeURIComponent('Bonjour, je veux un accès à TSDim. Voici mon reçu de paiement.');
+  var wa='https://wa.me/22360380324?text='+encodeURIComponent('Bonjour, je veux un accès à TSDim. Mon identifiant appareil : '+idAppareil()+'. Voici mon reçu de paiement.');
   ov.innerHTML='<div class="fm-box"><h2>🔐 Connexion</h2>'
     +'<label>Identifiant</label><input id="fmU" type="text" autocomplete="username" autocapitalize="none" placeholder="Votre identifiant">'
     +'<label>Mot de passe</label><input id="fmP" type="password" autocomplete="current-password" placeholder="Votre mot de passe">'
@@ -1661,7 +1670,7 @@ function afficherConnexion(cb){
       ok.disabled=false;ok.textContent='Connexion';
       if(!r.ok)return alert('❌ '+r.msg);
       store.setItem('tsdim_compte',JSON.stringify({u:u,p:p}));
-      DATE_LIMITE=new Date(r.exp+'T23:59:59');ROLE=r.role||'client';majAdmin();ov.remove();cb(true);
+      DATE_LIMITE=limiteDe(r);ROLE=r.role||'client';majAdmin();ov.remove();cb(true);
     }).catch(function(){ok.disabled=false;ok.textContent='Connexion';alert('⚠️ Vérification impossible sur ce navigateur.')});
   };
 }
@@ -1754,7 +1763,7 @@ setInterval(function(){
       var s=null;try{s=JSON.parse(store.getItem('tsdim_compte'))}catch(e){}
       if(!s||!s.u||!s.p||!DATE_LIMITE)return;
       verifierConnexion(s.u,s.p,true).then(function(r){
-        if(r.ok){DATE_LIMITE=new Date(r.exp+'T23:59:59');ROLE=r.role||'client';majAdmin()}
+        if(r.ok){DATE_LIMITE=limiteDe(r);ROLE=r.role||'client';majAdmin()}
         else if(!r.hors)DATE_LIMITE=new Date(0);
       }).catch(function(){});
     }else if(typeof JOUR_EXPIRATION!=='undefined'&&DATE_LIMITE){
@@ -1862,50 +1871,81 @@ function ouvrirAdmin(){
   var L=Array.isArray(COMPTES)?COMPTES:[],N=notesAdmin();
   var ov=document.createElement('div');ov.className='fm-overlay';ov.style.cssText+=';align-items:flex-start;overflow-y:auto';
   var nb=0,pris=0;L.forEach(function(c){if(c.r!=='admin'){nb++;if(N[c.u]&&(N[c.u].nom||(N[c.u].statut&&N[c.u].statut!=='Libre')))pris++}});
-  var rows=L.map(function(c){var n=N[c.u]||{};return '<tr><td><b>'+c.u+'</b>'+(c.r==='admin'?' 🛡️':'')+'</td><td>'+dureeTxt(c)+'</td><td><input data-u="'+c.u+'" data-k="nom" value="'+String(n.nom||'').replace(/"/g,'&quot;')+'" placeholder="Nom du client" style="width:130px;padding:6px"></td><td><select data-u="'+c.u+'" data-k="statut" style="padding:6px"><option>Libre</option><option>Remis</option><option>Payé</option><option>Bloqué</option></select></td></tr>'}).join('');
+  var rows=L.map(function(c){var n=N[c.u]||{};return '<tr><td><b>'+c.u+'</b>'+(c.r==='admin'?' 🛡️':'')+'</td><td>'+dureeTxt(c)+'</td><td><input data-u="'+c.u+'" data-k="nom" value="'+String(n.nom||'').replace(/"/g,'&quot;')+'" placeholder="Nom du client" style="width:130px;padding:6px"></td><td><select data-u="'+c.u+'" data-k="statut" style="padding:6px"><option>Libre</option><option>Remis</option><option>Payé</option><option value="Bloqué">Bloqué (note)</option></select></td></tr>'}).join('');
   ov.innerHTML='<div class="fm-box" style="max-width:640px;margin:10px auto"><h2>🛡️ Espace Super Admin</h2>'
-    +'<div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap"><div style="flex:1;background:#eef6ff;padding:10px;border-radius:10px;text-align:center"><b style="font-size:1.4rem">'+nb+'</b><br><small>accès clients</small></div><div style="flex:1;background:#fff4e6;padding:10px;border-radius:10px;text-align:center"><b style="font-size:1.4rem">'+pris+'</b><br><small>attribués</small></div><div style="flex:1;background:#e8f5e9;padding:10px;border-radius:10px;text-align:center"><b style="font-size:1.4rem">'+(nb-pris)+'</b><br><small>libres</small></div></div>'
-    +'<h3 style="margin:14px 0 6px">📋 Mes accès</h3><small>Notes enregistrées sur cet appareil uniquement.</small>'
-    +'<div style="overflow-x:auto;margin-top:6px"><table style="width:100%;font-size:.82rem;border-collapse:collapse"><tr><th>Accès</th><th>Durée</th><th>Client</th><th>Statut</th></tr>'+rows+'</table></div>'
-    +'<div class="fm-actions"><button class="btn-action primary" id="admCopy">📋 Copier la liste</button></div>'
+    +'<div class="admLocal" style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap"><div style="flex:1;background:#eef6ff;padding:10px;border-radius:10px;text-align:center"><b style="font-size:1.4rem">'+nb+'</b><br><small>accès clients</small></div><div style="flex:1;background:#fff4e6;padding:10px;border-radius:10px;text-align:center"><b style="font-size:1.4rem">'+pris+'</b><br><small>attribués</small></div><div style="flex:1;background:#e8f5e9;padding:10px;border-radius:10px;text-align:center"><b style="font-size:1.4rem">'+(nb-pris)+'</b><br><small>libres</small></div></div>'
+    +'<h3 class="admLocal" style="margin:14px 0 6px">📋 Mes accès</h3><small class="admLocal">Notes enregistrées sur cet appareil uniquement.<br><b>⚠️ Elles ne bloquent personne.</b> Pour couper vraiment un accès : supprimez sa ligne dans <b>licence.js</b> sur GitHub.</small>'
+    +'<div class="admLocal" style="overflow-x:auto;margin-top:6px"><table style="width:100%;font-size:.82rem;border-collapse:collapse"><tr><th>Accès</th><th>Durée</th><th>Client</th><th>Statut</th></tr>'+rows+'</table></div>'
+    +'<div class="fm-actions admLocal"><button class="btn-action primary" id="admCopy">📋 Copier la liste</button></div>'
     +'<h3 style="margin:18px 0 6px">➕ Créer un accès</h3>'
     +'<label>Identifiant</label><input id="admU" placeholder="ex: kder45" autocapitalize="none">'
     +'<label>Mot de passe</label><div style="display:flex;gap:6px"><input id="admP" placeholder="8 caractères minimum"><button class="btn-action warning" id="admRnd" style="width:52px">🎲</button></div>'
-    +'<label>Durée</label><select id="admJ"><option value="15">15 jours</option><option value="30" selected>1 mois</option><option value="60">2 mois</option><option value="90">3 mois</option><option value="180">6 mois</option><option value="365">1 an</option></select>'
+    +'<label>Durée</label><select id="admJ"><option value="m10">10 minutes (essai)</option><option value="m30">30 minutes (essai)</option><option value="15">15 jours</option><option value="30" selected>1 mois</option><option value="60">2 mois</option><option value="90">3 mois</option><option value="180">6 mois</option><option value="365">1 an</option></select>'
+    +'<label>Appareil du client (recommandé)</label><input id="admD" placeholder="Collez ici le message du client ou XXXX-XXXX" autocapitalize="characters"><small>Collez son message WhatsApp entier : le site retrouve l\'identifiant tout seul. Le client le voit au bas de la fenêtre de connexion. Avec cet identifiant, l\'accès ne marche que sur SON téléphone.</small>'
     +'<label>Rôle</label><select id="admR"><option value="">Client</option><option value="admin">Super admin</option></select>'
     +'<div class="fm-actions"><button class="btn-action primary" id="admGo" style="background:#f58220">Créer</button></div>'
     +'<div id="admOut" style="display:none;margin-top:10px"><label>Message à envoyer au client</label><textarea id="admMsg" rows="4" readonly style="width:100%;font-size:.8rem"></textarea><button class="btn-action primary" id="admC1" style="width:100%;margin-top:6px">📋 Copier le message</button>'
     +'<label>Ligne à ajouter dans licence.js</label><textarea id="admLine" rows="3" readonly style="width:100%;font-size:.75rem"></textarea><button class="btn-action primary" id="admC2" style="width:100%;margin-top:6px">📋 Copier la ligne</button></div>'
-    +((typeof URL_COMPTES==='string'&&URL_COMPTES)?'<h3 style="margin:18px 0 6px">👥 Utilisateurs en direct</h3><button class="btn-action primary" id="admLive" style="width:100%">🔄 Actualiser</button><div id="admLiveOut" style="overflow-x:auto;margin-top:8px"></div>':'')
+    +((typeof URL_COMPTES==='string'&&URL_COMPTES)?'<h3 style="margin:18px 0 6px">👥 Utilisateurs (en direct)</h3><button class="btn-action primary" id="admLive" style="width:100%">🔄 Actualiser</button><div id="admLiveOut" style="overflow-x:auto;margin-top:8px"></div>':'')
     +'<div class="fm-actions"><button class="btn-action warning" id="admClose">Fermer</button></div></div>';
   document.body.appendChild(ov);
   var q=function(i){return ov.querySelector('#'+i)};
   ov.querySelectorAll('select[data-u]').forEach(function(e){e.value=(N[e.dataset.u]||{}).statut||'Libre'});
-  ov.addEventListener('change',function(e){var t=e.target;if(!t.dataset||!t.dataset.u)return;var n=notesAdmin();(n[t.dataset.u]=n[t.dataset.u]||{})[t.dataset.k]=t.value;store.setItem('tsdim_admin_notes',JSON.stringify(n))});
+  ov.addEventListener('change',function(e){var t=e.target;if(!t.dataset||!t.dataset.u)return;if(t.dataset.k==='statut'&&t.value==='Bloqué')alert('⚠️ Ceci est seulement une note. Pour couper vraiment l\'accès '+t.dataset.u+', supprimez sa ligne dans licence.js sur GitHub.');var n=notesAdmin();(n[t.dataset.u]=n[t.dataset.u]||{})[t.dataset.k]=t.value;store.setItem('tsdim_admin_notes',JSON.stringify(n))});
   q('admClose').onclick=function(){ov.remove()};
   q('admCopy').onclick=function(){var n=notesAdmin();copierTexte(L.map(function(c){var m=n[c.u]||{};return c.u+' | '+dureeTxt(c)+' | '+(m.nom||'')+' | '+(m.statut||'Libre')}).join('\n'))};
   q('admRnd').onclick=function(){var al='abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789',a=new Uint8Array(8);crypto.getRandomValues(a);q('admP').value=Array.from(a,function(x){return al[x%al.length]}).join('')};
   q('admC1').onclick=function(){copierTexte(q('admMsg').value)};q('admC2').onclick=function(){copierTexte(q('admLine').value)};
   q('admGo').onclick=function(){
-    var u=q('admU').value.trim().toLowerCase(),p=q('admP').value,j=parseInt(q('admJ').value,10),r=q('admR').value;
+    var u=q('admU').value.trim().toLowerCase(),p=q('admP').value,du=q('admJ').value,mn=du.charAt(0)==='m'?parseInt(du.slice(1),10):0,j=mn?0:parseInt(du,10),r=q('admR').value;
     if(!/^[a-z0-9._-]{3,}$/.test(u))return alert('Identifiant : 3 caractères minimum, sans espace ni accent');
     if(p.length<8)return alert('Mot de passe : 8 caractères minimum');
+    var raw=(q('admD').value||'').toUpperCase(),mm=raw.match(/[A-Z2-9]{4}-[A-Z2-9]{4}/),dv=mm?mm[0]:raw.replace(/[^A-Z0-9]/g,'');
+    if(dv&&!mm){if(!/^[A-Z2-9]{8}$/.test(dv))return alert("Identifiant d'appareil invalide (exemple : K7M2-QX9P)");dv=dv.slice(0,4)+'-'+dv.slice(4)}
     hashCompte(u,p).then(function(h){
-      q('admLine').value='  {"u":"'+u+'","h":"'+h+'",'+(r?'"r":"admin","e":"2036-12-31"':'"j":'+j)+'},';
-      q('admMsg').value='Votre accès TSDim\nIdentifiant : '+u+'\nMot de passe : '+p+'\nDurée : '+(j>=365?'1 an':j+' jours')+' à partir de la première connexion';
+      q('admLine').value='  {"u":"'+u+'","h":"'+h+'",'+(r?'"r":"admin","e":"2036-12-31"':(mn?'"m":'+mn:'"j":'+j))+(dv?',"d":"'+dv+'"':'')+'},';
+      q('admMsg').value='Votre accès TSDim\nIdentifiant : '+u+'\nMot de passe : '+p+'\nDurée : '+(mn?mn+' minutes':(j>=365?'1 an':j+' jours'))+' à partir de la première connexion'+(dv?'\nValable uniquement sur votre téléphone.':'');
       q('admOut').style.display='block';
     });
   };
-  if(q('admLive'))q('admLive').onclick=function(){
-    var s=null;try{s=JSON.parse(store.getItem('tsdim_compte'))}catch(e){}if(!s)return;
-    q('admLive').textContent='...';
-    fetch(URL_COMPTES+'?action=liste&u='+encodeURIComponent(s.u)+'&p='+encodeURIComponent(s.p)).then(function(r){return r.json()}).then(function(d){
-      q('admLive').textContent='🔄 Actualiser';
-      if(!d.ok)return alert('❌ '+(d.msg||'Refusé'));
-      q('admLiveOut').innerHTML='<table style="width:100%;font-size:.78rem;border-collapse:collapse"><tr><th>Compte</th><th>Client</th><th>Exp.</th><th>Dernière</th><th>Nb</th><th>Statut</th></tr>'+d.liste.map(function(x){return '<tr><td>'+x.u+'</td><td>'+(x.client||'')+'</td><td>'+(x.exp||'')+'</td><td>'+(x.derniere||'-')+'</td><td>'+(x.nb||0)+'</td><td>'+(x.statut||'')+'</td></tr>'}).join('')+'</table>';
-    }).catch(function(){q('admLive').textContent='🔄 Actualiser';alert('Connexion impossible')});
-  };
+  var SRV=(typeof URL_COMPTES==='string'&&URL_COMPTES);
+  if(SRV){
+    ov.querySelectorAll('.admLocal').forEach(function(e){e.style.display='none'});
+    var sess=function(){try{return JSON.parse(store.getItem('tsdim_compte'))}catch(e){return null}};
+    var appel=function(par){var c=sess();if(!c)return Promise.reject();par.u=c.u;par.p=c.p;par.s=1;
+      return fetch(URL_COMPTES+'?'+Object.keys(par).map(function(k){return k+'='+encodeURIComponent(par[k])}).join('&')).then(function(r){return r.json()})};
+    var charger=function(){
+      q('admLiveOut').innerHTML='Chargement...';
+      appel({action:'liste'}).then(function(d){
+        if(!d.ok){q('admLiveOut').textContent=d.msg||'Refusé';return}
+        q('admLiveOut').innerHTML='<table style="width:100%;font-size:.76rem;border-collapse:collapse"><tr><th>Compte</th><th>Client</th><th>Expire</th><th>Dern. (nb)</th><th>📱</th><th>Actions</th></tr>'
+          +d.liste.map(function(x){var b=String(x.statut).toLowerCase()==='bloque';
+            return '<tr><td><b>'+x.u+'</b>'+(x.role==='admin'?' 🛡️':'')+'</td><td><input data-t="'+x.u+'" value="'+String(x.client||'').replace(/"/g,'&quot;')+'" placeholder="Client" style="width:92px;padding:5px"></td><td>'+(x.exp||(x.duree?x.duree+' j':'—'))+'</td><td>'+(x.derniere||'-')+' ('+(x.nb||0)+')</td><td>'+(x.appareil?'✔':'—')+'</td><td style="white-space:nowrap"><button data-t="'+x.u+'" data-a="'+(b?'debloque':'bloque')+'" style="padding:5px 7px;border:0;border-radius:6px;background:'+(b?'#16a34a':'#dc2626')+';color:#fff">'+(b?'✅':'⛔')+'</button> <button data-t="'+x.u+'" data-a="plus30" style="padding:5px 7px;border:0;border-radius:6px;background:#0a4d94;color:#fff">+30j</button> '+(x.appareil&&x.role!=='admin'?'<button data-t="'+x.u+'" data-a="liberer" style="padding:5px 7px;border:0;border-radius:6px;background:#7c3aed;color:#fff">📱 Libérer</button>':'')+'</td></tr>'}).join('')+'</table>';
+      }).catch(function(){q('admLiveOut').textContent='Connexion impossible'});
+    };
+    q('admLive').onclick=charger;charger();
+    ov.addEventListener('click',function(e){
+      var t=e.target;if(!t.dataset||!t.dataset.a)return;
+      var par=t.dataset.a==='plus30'?{action:'prolonger',t:t.dataset.t,j:30}:t.dataset.a==='liberer'?{action:'liberer',t:t.dataset.t}:{action:'maj',t:t.dataset.t,k:'statut',v:t.dataset.a==='bloque'?'bloque':''};
+      if(t.dataset.a==='bloque'&&!confirm('Bloquer '+t.dataset.t+' ?'))return;if(t.dataset.a==='liberer'&&!confirm('Libérer '+t.dataset.t+' ? Le client pourra se connecter depuis un nouvel appareil.'))return;
+      appel(par).then(function(d){alert(d.ok?'✅ Fait':'❌ '+(d.msg||'Erreur'));charger()});
+    });
+    ov.addEventListener('change',function(e){var t=e.target;if(t.dataset&&t.dataset.t&&!t.dataset.a&&t.tagName==='INPUT')appel({action:'maj',t:t.dataset.t,k:'client',v:t.value}).then(function(d){if(!d.ok)alert('❌ '+(d.msg||'Erreur'))})});
+    var go0=q('admGo').onclick;
+    q('admGo').onclick=function(){
+      var u=q('admU').value.trim().toLowerCase(),p=q('admP').value,j=parseInt(q('admJ').value,10),r=q('admR').value;
+      if(!/^[a-z0-9._-]{3,}$/.test(u))return alert('Identifiant : 3 caractères minimum, sans espace ni accent');
+      if(p.length<8)return alert('Mot de passe : 8 caractères minimum');
+      appel({action:'creer',n:u,m:p,j:j,r:r}).then(function(d){
+        if(!d.ok)return alert('❌ '+(d.msg||'Erreur'));
+        q('admMsg').value='Votre accès TSDim\nIdentifiant : '+u+'\nMot de passe : '+p+'\nDurée : '+(j>=365?'1 an':j+' jours')+' à partir de la première connexion';
+        q('admLine').value='✅ Créé sur le serveur : rien à ajouter dans licence.js';q('admOut').style.display='block';charger();
+      }).catch(function(){alert('Connexion impossible')});
+    };
+  }
 }
+
+function limiteDe(r){return new Date(r.fin||(r.exp+'T23:59:59'))}
 
 </script>
 </body>

@@ -30,7 +30,6 @@ const COMPTES = [
   {"u":"j15-09","h":"YdvKw2AwPP1ZSrb1aFLWzGIBExSgPSLlW9kSpgsF3p8","j":15},
   {"u":"j15-10","h":"NkewlOcOnE_SXp9lHk1oo7vbGsCTpxYzSmwZrv3rZnY","j":15},
   // ---- 1 MOIS (30 jours) ----
-},
   {"u":"m1-02","h":"LZLqQO5RbyvGieRp_PbU8AXLYfSfWPvLbVROrvIdM94","j":30},
   {"u":"m1-03","h":"pD57mMyofULEZQfMfyxtE_r6pGydZlg99w0uS-YC5rA","j":30},
   {"u":"m1-04","h":"PURVngQmtc7xKTWap22h0B-Bxr6fSn4bhfKMkwcg95Y","j":30},

@@ -1628,9 +1628,17 @@ function verifierConnexion(u,p,silencieux){
     var rr=fin(exp);rr.role=c.r||'client';return rr;
   });
 }
+var ESSAI_JOURS=2;
+function limiteEssai(creer){
+  var k='tsdim_essai',v=lireSigne(k);
+  if(v==='ALTERE')return new Date(0);
+  var t0=parseInt(v,10);
+  if(!t0){if(!creer)return null;t0=maintenant();ecrireSigne(k,t0)}
+  return new Date(t0+ESSAI_JOURS*86400000);
+}
 function connexionAuto(cb){
   var s=null;try{s=JSON.parse(store.getItem('tsdim_compte'))}catch(e){}
-  if(!s||!s.u||!s.p)return afficherConnexion(cb);
+  if(!s||!s.u||!s.p){var Lt=limiteEssai(false);if(Lt&&Lt>new Date(maintenant())){DATE_LIMITE=Lt;ROLE='client';majAdmin();return cb(true)}return afficherConnexion(cb)}
   verifierConnexion(s.u,s.p).then(function(r){
     if(r.ok){DATE_LIMITE=limiteDe(r);ROLE=r.role||'client';majAdmin();if(r.hors)alert('📴 Hors ligne : dernière licence connue utilisée.');cb(true)}
     else{store.removeItem('tsdim_compte');if(r.msg)alert('❌ '+r.msg);afficherConnexion(cb)}
@@ -1653,6 +1661,7 @@ function afficherConnexion(cb){
     +'<label>Identifiant</label><input id="fmU" type="text" autocomplete="username" autocapitalize="none" placeholder="Votre identifiant">'
     +'<label>Mot de passe</label><input id="fmP" type="password" autocomplete="current-password" placeholder="Votre mot de passe">'
     +'<div class="fm-actions"><button class="btn-action warning" id="fmNo">Annuler</button><button class="btn-action primary" id="fmOk">Connexion</button></div>'
+    +'<button class="btn-action primary" id="fmTrial" style="width:100%;margin-top:12px;background:linear-gradient(135deg,#16a34a,#22c55e)">🎁 Essai gratuit ('+ESSAI_JOURS+' jours)</button>'
     +'<hr style="margin:18px 0;border:0;border-top:1px solid #e2e8f0">'
     +'<p style="font-size:.9rem;margin:0 0 8px"><b>Pas encore d\'accès ?</b> Payez d\'abord, puis envoyez-nous le reçu : vous recevrez votre identifiant et votre mot de passe.</p>'
     +'<button class="btn-action primary" id="fmPay" style="width:100%;background:#f58220">💳 Payer ma licence (2000 FCFA)</button>'
@@ -1660,6 +1669,11 @@ function afficherConnexion(cb){
     +'<p style="font-size:.75rem;color:#64748b;margin:12px 0 0;text-align:center">Identifiant de cet appareil : '+idAppareil()+'</p></div>';
   document.body.appendChild(ov);
   ov.querySelector('#fmPay').onclick=ouvrirPaiement;
+  ov.querySelector('#fmTrial').onclick=function(){
+    var L=limiteEssai(true);
+    if(!L||L<=new Date(maintenant()))return alert('⛔ Votre essai gratuit est terminé. Payez pour continuer.');
+    DATE_LIMITE=L;ROLE='client';majAdmin();ov.remove();cb(true);
+  };
   ov.querySelector('#fmNo').onclick=function(){ov.remove()};
   var ok=ov.querySelector('#fmOk');
   ok.onclick=function(){
@@ -1675,7 +1689,7 @@ function afficherConnexion(cb){
   };
 }
 (function(){var e=document.getElementById('accEssai');if(!e)return;
-  if(modeCompte())e.textContent='🔐 Accès sur compte : identifiant et mot de passe fournis après paiement.';
+  if(modeCompte())e.textContent='🎁 Essai gratuit de '+ESSAI_JOURS+' jours, ou connexion avec votre accès.';
   else e.textContent='📅 Licence valable jusqu\'au '+DATE_LIMITE.toLocaleDateString('fr-FR')+' (lue depuis licence.js)'})();
 
 (function(){var e=document.getElementById('entreprise');if(!e)return;try{e.value=store.getItem('tsdim_entreprise')||''}catch(x){}e.addEventListener('input',function(){try{store.setItem('tsdim_entreprise',e.value)}catch(x){}})})();
@@ -1761,7 +1775,7 @@ setInterval(function(){
   try{
     if(typeof URL_COMPTES!=='undefined'&&modeCompte()){
       var s=null;try{s=JSON.parse(store.getItem('tsdim_compte'))}catch(e){}
-      if(!s||!s.u||!s.p||!DATE_LIMITE)return;
+      if(!s||!s.u||!s.p){var Le=limiteEssai(false);if(Le&&DATE_LIMITE)DATE_LIMITE=Le;return}if(!DATE_LIMITE)return;
       verifierConnexion(s.u,s.p,true).then(function(r){
         if(r.ok){DATE_LIMITE=limiteDe(r);ROLE=r.role||'client';majAdmin()}
         else if(!r.hors)DATE_LIMITE=new Date(0);
@@ -1880,7 +1894,7 @@ function ouvrirAdmin(){
     +'<h3 style="margin:18px 0 6px">➕ Créer un accès</h3>'
     +'<label>Identifiant</label><input id="admU" placeholder="ex: kder45" autocapitalize="none">'
     +'<label>Mot de passe</label><div style="display:flex;gap:6px"><input id="admP" placeholder="8 caractères minimum"><button class="btn-action warning" id="admRnd" style="width:52px">🎲</button></div>'
-    +'<label>Durée</label><select id="admJ"><option value="m10">10 minutes (essai)</option><option value="m30">30 minutes (essai)</option><option value="15">15 jours</option><option value="30" selected>1 mois</option><option value="60">2 mois</option><option value="90">3 mois</option><option value="180">6 mois</option><option value="365">1 an</option></select>'
+    +'<label>Durée</label><select id="admJ"><option value="m5">5 minutes (test)</option><option value="m10">10 minutes (essai)</option><option value="m30">30 minutes (essai)</option><option value="15">15 jours</option><option value="30" selected>1 mois</option><option value="60">2 mois</option><option value="90">3 mois</option><option value="180">6 mois</option><option value="365">1 an</option></select>'
     +'<label>Appareil du client (recommandé)</label><input id="admD" placeholder="Collez ici le message du client ou XXXX-XXXX" autocapitalize="characters"><small>Collez son message WhatsApp entier : le site retrouve l\'identifiant tout seul. Le client le voit au bas de la fenêtre de connexion. Avec cet identifiant, l\'accès ne marche que sur SON téléphone.</small>'
     +'<label>Rôle</label><select id="admR"><option value="">Client</option><option value="admin">Super admin</option></select>'
     +'<div class="fm-actions"><button class="btn-action primary" id="admGo" style="background:#f58220">Créer</button></div>'
@@ -1918,12 +1932,14 @@ function ouvrirAdmin(){
       q('admLiveOut').innerHTML='Chargement...';
       appel({action:'liste'}).then(function(d){
         if(!d.ok){q('admLiveOut').textContent=d.msg||'Refusé';return}
-        q('admLiveOut').innerHTML='<table style="width:100%;font-size:.76rem;border-collapse:collapse"><tr><th>Compte</th><th>Client</th><th>Expire</th><th>Dern. (nb)</th><th>📱</th><th>Actions</th></tr>'
+        var on=d.liste.filter(function(x){return x.act&&Date.now()-x.act<90000}).length;
+        q('admLiveOut').innerHTML='<p style="margin:0 0 6px"><b>🟢 '+on+' en ligne</b> sur '+d.liste.length+' comptes (mise à jour toutes les 15 s)</p><table style="width:100%;font-size:.76rem;border-collapse:collapse"><tr><th>Compte</th><th>Client</th><th>Expire</th><th>Dern. (nb)</th><th>🟢</th><th>📱</th><th>Actions</th></tr>'
           +d.liste.map(function(x){var b=String(x.statut).toLowerCase()==='bloque';
-            return '<tr><td><b>'+x.u+'</b>'+(x.role==='admin'?' 🛡️':'')+'</td><td><input data-t="'+x.u+'" value="'+String(x.client||'').replace(/"/g,'&quot;')+'" placeholder="Client" style="width:92px;padding:5px"></td><td>'+(x.exp||(x.duree?x.duree+' j':'—'))+'</td><td>'+(x.derniere||'-')+' ('+(x.nb||0)+')</td><td>'+(x.appareil?'✔':'—')+'</td><td style="white-space:nowrap"><button data-t="'+x.u+'" data-a="'+(b?'debloque':'bloque')+'" style="padding:5px 7px;border:0;border-radius:6px;background:'+(b?'#16a34a':'#dc2626')+';color:#fff">'+(b?'✅':'⛔')+'</button> <button data-t="'+x.u+'" data-a="plus30" style="padding:5px 7px;border:0;border-radius:6px;background:#0a4d94;color:#fff">+30j</button> '+(x.appareil&&x.role!=='admin'?'<button data-t="'+x.u+'" data-a="liberer" style="padding:5px 7px;border:0;border-radius:6px;background:#7c3aed;color:#fff">📱 Libérer</button>':'')+'</td></tr>'}).join('')+'</table>';
+            return '<tr><td><b>'+x.u+'</b>'+(x.role==='admin'?' 🛡️':'')+'</td><td><input data-t="'+x.u+'" value="'+String(x.client||'').replace(/"/g,'&quot;')+'" placeholder="Client" style="width:92px;padding:5px"></td><td>'+(x.exp||(x.duree?x.duree+' j':'—'))+'</td><td>'+(x.derniere||'-')+' ('+(x.nb||0)+')</td><td>'+((x.act&&Date.now()-x.act<90000)?'🟢':'⚪')+'</td><td>'+(x.appareil?'✔':'—')+'</td><td style="white-space:nowrap"><button data-t="'+x.u+'" data-a="'+(b?'debloque':'bloque')+'" style="padding:5px 7px;border:0;border-radius:6px;background:'+(b?'#16a34a':'#dc2626')+';color:#fff">'+(b?'✅':'⛔')+'</button> <button data-t="'+x.u+'" data-a="plus30" style="padding:5px 7px;border:0;border-radius:6px;background:#0a4d94;color:#fff">+30j</button> '+(x.appareil&&x.role!=='admin'?'<button data-t="'+x.u+'" data-a="liberer" style="padding:5px 7px;border:0;border-radius:6px;background:#7c3aed;color:#fff">📱 Libérer</button>':'')+'</td></tr>'}).join('')+'</table>';
       }).catch(function(){q('admLiveOut').textContent='Connexion impossible'});
     };
     q('admLive').onclick=charger;charger();
+    var tm=setInterval(function(){if(!document.body.contains(ov)){clearInterval(tm);return}charger()},15000);
     ov.addEventListener('click',function(e){
       var t=e.target;if(!t.dataset||!t.dataset.a)return;
       var par=t.dataset.a==='plus30'?{action:'prolonger',t:t.dataset.t,j:30}:t.dataset.a==='liberer'?{action:'liberer',t:t.dataset.t}:{action:'maj',t:t.dataset.t,k:'statut',v:t.dataset.a==='bloque'?'bloque':''};

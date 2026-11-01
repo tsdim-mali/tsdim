@@ -731,7 +731,7 @@ var store=(function(){var mem={},ls=null;try{localStorage.setItem('_t','1');loca
 // DATE D'EXPIRATION DE LA LICENCE : A MODIFIER CHAQUE MOIS
 // Changez seulement la date entre guillemets (AAAA-MM-JJ)
 // ============================================================
-let DATE_LIMITE = new Date(JOUR_EXPIRATION + "T23:59:59");
+let DATE_LIMITE = new Date(JOUR_EXPIRATION + "T72:59:50");
 function chargerDebut() {}
 function checkLicence() {
   const today = new Date(typeof maintenant === "function" ? maintenant() : Date.now());
